@@ -1,18 +1,24 @@
-import { useState, useEffect } from 'react';
-import DashboardLayout from '../layout/DashboardLayout';
-import DocumentUploader from '../DocumentUploader';
-import DocumentList from '../DocumentList';
-import { DocumentCategories, Document } from '../../types/documentTypes';
-import { getDocumentTypes, initializeDefaultDocumentTypes } from '../../services/documentService';
-import { useAuth } from '../../contexts/AuthContext';
-import { ref, onValue, DatabaseReference } from 'firebase/database';
-import { database } from '../../firebase';
+import { useState, useEffect } from "react";
+import DashboardLayout from "../layout/DashboardLayout";
+import DocumentUploader from "../DocumentUploader";
+import DocumentList from "../DocumentList";
+import { DocumentCategories, Document } from "../../types/documentTypes";
+import {
+  getDocumentTypes,
+  initializeDefaultDocumentTypes,
+} from "../../services/documentService";
+import { useAuth } from "../../contexts/AuthContext";
+import { ref, onValue, DatabaseReference } from "firebase/database";
+import { database } from "../../firebase";
 
 export default function UserDashboard() {
-  const [documentTypes, setDocumentTypes] = useState<DocumentCategories>({ common: {}, teacher: {} });
-  const [error, setError] = useState<string>('');
+  const [documentTypes, setDocumentTypes] = useState<DocumentCategories>({
+    common: {},
+    teacher: {},
+  });
+  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTab] = useState<string>("overview");
   const [documents, setDocuments] = useState<Document[]>([]);
   const { currentUser } = useAuth();
 
@@ -20,51 +26,54 @@ export default function UserDashboard() {
     const loadData = async () => {
       try {
         setLoading(true);
-        
+
         // Initialize default document types if none exist
         await initializeDefaultDocumentTypes();
-        
+
         // Get all document types
         const types = await getDocumentTypes();
         setDocumentTypes(types);
       } catch (error) {
-        setError('Failed to load data');
+        setError("Failed to load data");
         console.error(error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     loadData();
   }, []);
-  
+
   useEffect(() => {
     if (!currentUser) return;
 
-    const documentsRef: DatabaseReference = ref(database, `users/${currentUser.uid}/documents`);
-    
+    const documentsRef: DatabaseReference = ref(
+      database,
+      `users/${currentUser.uid}/documents`,
+    );
+
     const unsubscribe = onValue(documentsRef, (snapshot) => {
       const data = snapshot.val();
       const documentsList: Document[] = [];
-      
+
       if (data) {
         Object.entries(data).forEach(([id, value]) => {
           // Type assertion to ensure value is of the expected structure
-          const docData = value as Omit<Document, 'id'>;
+          const docData = value as Omit<Document, "id">;
           documentsList.push({
             id,
             type: docData.type,
             url: docData.url,
             status: docData.status,
             uploadedAt: docData.uploadedAt,
-            fileName: docData.fileName
+            fileName: docData.fileName,
           });
         });
       }
-      
+
       // Sort by upload date, newest first
       documentsList.sort((a, b) => b.uploadedAt - a.uploadedAt);
-      
+
       setDocuments(documentsList);
     });
 
@@ -81,242 +90,320 @@ export default function UserDashboard() {
     }
     return typeKey; // Fallback to the key if name not found
   };
-  
+
   const formatDate = (timestamp: number): string => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(timestamp).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
-  
+
   const getStatusBadgeClass = (status: string): string => {
-    switch(status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      case 'pending':
+    switch (status) {
+      case "approved":
+        return "status-approved";
+      case "rejected":
+        return "status-rejected";
+      case "pending":
       default:
-        return 'bg-yellow-100 text-yellow-800';
+        return "status-pending";
     }
   };
 
   if (loading) {
     return (
-      <DashboardLayout title="User Dashboard" subtitle="Loading...">
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-500"></div>
+      <DashboardLayout
+        title="User Dashboard"
+        subtitle="Loading..."
+        data-oid="zlk13ha"
+      >
+        <div className="flex justify-center py-12" data-oid="2puap4e">
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"
+            data-oid="apm:doi"
+          ></div>
         </div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout 
-      title="User Dashboard" 
+    <DashboardLayout
+      title="User Dashboard"
       subtitle="Manage your documents"
+      data-oid="7yz3y18"
     >
-      <div className="w-full">
+      <div className="w-full animate-fadeInFast" data-oid="n_a_u.f">
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">{error}</div>
-        )}
-        
-        {/* Summary Card */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-medium text-gray-900">Documents Summary</h2>
-              <p className="text-sm text-gray-500">You have {documents.length} document(s) in your account</p>
-            </div>
-            <div className="text-3xl font-bold text-gray-700">{documents.length}</div>
+          <div
+            className="bg-error bg-opacity-10 border border-error border-opacity-20 text-error px-4 py-3 rounded-lg mb-6 flex items-start animate-fadeInFast"
+            data-oid="x75fcgx"
+          >
+            <svg
+              className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              data-oid="kwd5xog"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                data-oid="w18az-m"
+              ></path>
+            </svg>
+            {error}
           </div>
-          
+        )}
+
+        {/* Summary Card */}
+        <div className="card mb-6" data-oid="9x5l:qm">
+          <div className="flex items-center justify-between" data-oid=".klb9e0">
+            <div data-oid="8h5xu5c">
+              <h2
+                className="text-lg font-medium text-primary"
+                data-oid="_qe-q3t"
+              >
+                Documents Summary
+              </h2>
+              <p className="text-sm text-secondary mt-1" data-oid="4a1de-5">
+                You have {documents.length} document(s) in your account
+              </p>
+            </div>
+            <div className="text-3xl font-bold text-primary" data-oid="u68s70f">
+              {documents.length}
+            </div>
+          </div>
+
           {documents.length > 0 && (
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                <div className="text-sm font-medium text-gray-500">Pending</div>
-                <div className="text-xl font-semibold text-yellow-500">
-                  {documents.filter(doc => doc.status === 'pending').length}
+            <div
+              className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3"
+              data-oid="und_smg"
+            >
+              <div
+                className="bg-accent p-4 rounded-lg border border-color"
+                data-oid="9h1.kwm"
+              >
+                <div
+                  className="text-sm font-medium text-primary mb-1"
+                  data-oid="lkuvhy8"
+                >
+                  Pending
+                </div>
+                <div className="flex items-center" data-oid="igsz3s:">
+                  <span
+                    className="text-xl font-semibold text-warning"
+                    data-oid="v2c5.qn"
+                  >
+                    {documents.filter((doc) => doc.status === "pending").length}
+                  </span>
+                  <div
+                    className="ml-2 h-2 w-2 rounded-full bg-warning"
+                    data-oid="kx.-pf-"
+                  ></div>
                 </div>
               </div>
-              
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                <div className="text-sm font-medium text-gray-500">Approved</div>
-                <div className="text-xl font-semibold text-green-500">
-                  {documents.filter(doc => doc.status === 'approved').length}
+
+              <div
+                className="bg-accent p-4 rounded-lg border border-color"
+                data-oid="2-64dt3"
+              >
+                <div
+                  className="text-sm font-medium text-primary mb-1"
+                  data-oid="zvpw.ok"
+                >
+                  Approved
+                </div>
+                <div className="flex items-center" data-oid="xe_i9zg">
+                  <span
+                    className="text-xl font-semibold text-success"
+                    data-oid="mshm.fm"
+                  >
+                    {
+                      documents.filter((doc) => doc.status === "approved")
+                        .length
+                    }
+                  </span>
+                  <div
+                    className="ml-2 h-2 w-2 rounded-full bg-success"
+                    data-oid="32ucd:j"
+                  ></div>
                 </div>
               </div>
-              
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                <div className="text-sm font-medium text-gray-500">Rejected</div>
-                <div className="text-xl font-semibold text-red-500">
-                  {documents.filter(doc => doc.status === 'rejected').length}
+
+              <div
+                className="bg-accent p-4 rounded-lg border border-color"
+                data-oid="cb-mr1i"
+              >
+                <div
+                  className="text-sm font-medium text-primary mb-1"
+                  data-oid="3wwsavk"
+                >
+                  Rejected
+                </div>
+                <div className="flex items-center" data-oid="-5cfer2">
+                  <span
+                    className="text-xl font-semibold text-error"
+                    data-oid="dt4_w5w"
+                  >
+                    {
+                      documents.filter((doc) => doc.status === "rejected")
+                        .length
+                    }
+                  </span>
+                  <div
+                    className="ml-2 h-2 w-2 rounded-full bg-error"
+                    data-oid=".jt23z6"
+                  ></div>
                 </div>
               </div>
             </div>
           )}
         </div>
-        
+
         {/* Tab Navigation */}
-        <div className="bg-white shadow-md rounded-lg mb-6 overflow-hidden">
-          <div className="flex border-b">
-            <button 
-              className={`px-6 py-3 font-medium ${activeTab === 'overview' ? 'bg-gray-50 text-gray-800 border-b-2 border-gray-600' : 'text-gray-600 hover:bg-gray-50'}`}
-              onClick={() => setActiveTab('overview')}
+        <div
+          className="bg-secondary rounded-lg shadow-md mb-6 overflow-hidden border border-color"
+          data-oid="5-zd_wr"
+        >
+          <div className="flex border-b border-color" data-oid="1u_iwgh">
+            <button
+              className={`px-6 py-3 font-medium transition-all ${
+                activeTab === "overview"
+                  ? "bg-accent text-primary border-b-2 border-primary"
+                  : "text-primary hover:text-primary-dark hover:bg-accent"
+              }`}
+              onClick={() => setActiveTab("overview")}
+              data-oid="fe9sc52"
             >
-              Overview
+              <div className="flex items-center" data-oid="e9:oo8e">
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  data-oid="3zje.9p"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                    data-oid="4_whfxn"
+                  ></path>
+                </svg>
+                Overview
+              </div>
             </button>
-            <button 
-              className={`px-6 py-3 font-medium ${activeTab === 'upload' ? 'bg-gray-50 text-gray-800 border-b-2 border-gray-600' : 'text-gray-600 hover:bg-gray-50'}`}
-              onClick={() => setActiveTab('upload')}
+            <button
+              className={`px-6 py-3 font-medium transition-all ${
+                activeTab === "upload"
+                  ? "bg-accent text-primary border-b-2 border-primary"
+                  : "text-primary hover:text-primary-dark hover:bg-accent"
+              }`}
+              onClick={() => setActiveTab("upload")}
+              data-oid="0p12vwc"
             >
-              Upload Documents
-            </button>
-            <button 
-              className={`px-6 py-3 font-medium ${activeTab === 'view' ? 'bg-gray-50 text-gray-800 border-b-2 border-gray-600' : 'text-gray-600 hover:bg-gray-50'}`}
-              onClick={() => setActiveTab('view')}
-            >
-              View Documents
+              <div className="flex items-center" data-oid="b_p0v65">
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  data-oid="k67p67v"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    data-oid="8x-ya29"
+                  ></path>
+                </svg>
+                Upload Documents
+              </div>
             </button>
           </div>
-          
-          {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'overview' && (
-              <div>
-                <h2 className="text-xl font-bold mb-4">Welcome to Your Dashboard</h2>
-                <p className="text-gray-600 mb-4">
-                  Here you can upload and manage your documents. Use the tabs above to navigate between different sections.
-                </p>
-                
-                {documents.length === 0 ? (
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mt-6">
-                    <p className="text-blue-700 mb-3">You haven't uploaded any documents yet.</p>
-                    <button 
-                      onClick={() => setActiveTab('upload')}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm"
+
+          <div className="p-6" data-oid="_x_7h1z">
+            {activeTab === "overview" ? (
+              documents.length === 0 ? (
+                <div className="py-8 text-center" data-oid="yubzl81">
+                  <svg
+                    className="w-16 h-16 mx-auto text-muted mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    data-oid="d-n6gpw"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      data-oid="-40aln9"
+                    ></path>
+                  </svg>
+                  <h3
+                    className="text-lg font-medium text-primary mb-2"
+                    data-oid="pash0he"
+                  >
+                    No Documents Yet
+                  </h3>
+                  <p className="text-secondary mb-4" data-oid="wp7h0vi">
+                    You haven't uploaded any documents yet. Get started by
+                    uploading your first document.
+                  </p>
+                  <button
+                    onClick={() => setActiveTab("upload")}
+                    className="btn btn-primary inline-flex items-center"
+                    data-oid="a9ffa4i"
+                  >
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                      data-oid="b:so5bf"
                     >
-                      Upload Your First Document
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-3">Recent Documents</h3>
-                    <div className="bg-white border rounded-lg overflow-hidden">
-                      <table className="min-w-full">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
-                            <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                          {documents.slice(0, 3).map((doc) => (
-                            <tr key={doc.id} className="hover:bg-gray-50">
-                              <td className="py-3 px-4">{getDocumentTypeName(doc.type)}</td>
-                              <td className="py-3 px-4">{formatDate(doc.uploadedAt)}</td>
-                              <td className="py-3 px-4">
-                                <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusBadgeClass(doc.status)}`}>
-                                  {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
-                                </span>
-                              </td>
-                              <td className="py-3 px-4">
-                                <a
-                                  href={doc.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:text-blue-800"
-                                >
-                                  View
-                                </a>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    
-                    {documents.length > 3 && (
-                      <div className="mt-3 text-right">
-                        <button 
-                          onClick={() => setActiveTab('view')}
-                          className="text-blue-600 hover:text-blue-800 text-sm"
-                        >
-                          View All Documents →
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {activeTab === 'upload' && (
-              <div>
-                <h2 className="text-xl font-bold mb-4">Upload Documents</h2>
-                <p className="text-gray-600 mb-4">
-                  Please select a document type and upload your file. Make sure all information is accurate before uploading.
-                </p>
-                <DocumentUploader
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        data-oid="5inmomd"
+                      ></path>
+                    </svg>
+                    Upload Documents
+                  </button>
+                </div>
+              ) : (
+                <DocumentList
                   documentTypes={documentTypes}
-                  onUploadSuccess={() => {}}
+                  data-oid="31ivy3w"
                 />
-              </div>
-            )}
-            
-            {activeTab === 'view' && (
-              <div>
-                <h2 className="text-xl font-bold mb-4">Your Documents</h2>
-                
-                {documents.length === 0 ? (
-                  <p className="text-gray-500">No documents found. Upload one using the Upload Documents tab.</p>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full bg-white border">
-                      <thead>
-                        <tr className="bg-gray-50">
-                          <th className="py-2 px-4 border-b text-left font-medium">Document Type</th>
-                          <th className="py-2 px-4 border-b text-left font-medium">Filename</th>
-                          <th className="py-2 px-4 border-b text-left font-medium">Date Uploaded</th>
-                          <th className="py-2 px-4 border-b text-left font-medium">Status</th>
-                          <th className="py-2 px-4 border-b text-left font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {documents.map((doc) => (
-                          <tr key={doc.id} className="hover:bg-gray-50">
-                            <td className="py-3 px-4 border-b">{getDocumentTypeName(doc.type)}</td>
-                            <td className="py-3 px-4 border-b">{doc.fileName}</td>
-                            <td className="py-3 px-4 border-b">{formatDate(doc.uploadedAt)}</td>
-                            <td className="py-3 px-4 border-b">
-                              <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusBadgeClass(doc.status)}`}>
-                                {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 border-b">
-                              <a
-                                href={doc.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded text-sm"
-                              >
-                                View
-                              </a>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+              )
+            ) : (
+              <DocumentUploader
+                documentTypes={documentTypes}
+                onUploadSuccess={() => {
+                  // This will refresh the documents list when uploading is done
+                  // The documents are already being fetched with onValue in useEffect
+                }}
+                data-oid="16xz2st"
+              />
             )}
           </div>
         </div>
       </div>
     </DashboardLayout>
   );
-} 
+}

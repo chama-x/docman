@@ -3,6 +3,18 @@ import { database } from '../firebase';
 import { initializeTestUsers } from './userService';
 import { initializeDefaultDocumentTypes } from './documentService';
 
+// Function to get the current app status
+export const getAppStatus = async (): Promise<string | null> => {
+  try {
+    const statusRef = ref(database, 'appStatus/status');
+    const snapshot = await get(statusRef);
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.error('Error getting app status:', error);
+    return null; // Return null or throw error depending on desired handling
+  }
+};
+
 // Check if the database has been initialized
 export const isDatabaseInitialized = async (): Promise<boolean> => {
   try {

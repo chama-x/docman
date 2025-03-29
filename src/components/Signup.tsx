@@ -1,48 +1,51 @@
-import { useState, FormEvent } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { FirebaseError } from 'firebase/app';
+import { useState, FormEvent } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { FirebaseError } from "firebase/app";
+import InputField from "./InputField";
 
 interface SignupProps {
   switchToLogin: () => void;
 }
 
 export default function Signup({ switchToLogin }: SignupProps) {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [confirmPassword, setConfirmPassword] = useState<string>('');
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [isTeacher, setIsTeacher] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [isTeacher, setIsTeacher] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const { signup } = useAuth();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
     setSuccess(false);
 
     // Validation
     if (password.length < 6) {
-      return setError('Password should be at least 6 characters');
+      return setError("Password should be at least 6 characters");
     }
 
     if (password !== confirmPassword) {
-      return setError('Passwords do not match');
+      return setError("Passwords do not match");
+    }
+
+    if (!isTeacher) {
+      return setError("You must sign up as a teacher");
     }
 
     try {
       setLoading(true);
-      await signup(email, password, isAdmin, isTeacher);
+      await signup(email, password);
       setSuccess(true);
-      
+
       // Reset form after successful signup
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-      setIsAdmin(false);
-      setIsTeacher(false);
-      
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setIsTeacher(true);
+
       // Switch to login after 2 seconds
       setTimeout(() => {
         switchToLogin();
@@ -50,20 +53,20 @@ export default function Signup({ switchToLogin }: SignupProps) {
     } catch (error) {
       if (error instanceof FirebaseError) {
         switch (error.code) {
-          case 'auth/email-already-in-use':
-            setError('Email is already in use');
+          case "auth/email-already-in-use":
+            setError("Email is already in use");
             break;
-          case 'auth/invalid-email':
-            setError('Invalid email address');
+          case "auth/invalid-email":
+            setError("Invalid email address");
             break;
-          case 'auth/weak-password':
-            setError('Password is too weak');
+          case "auth/weak-password":
+            setError("Password is too weak");
             break;
           default:
             setError(`Failed to create an account: ${error.message}`);
         }
       } else {
-        setError('Failed to create an account');
+        setError("Failed to create an account");
       }
       console.error(error);
     } finally {
@@ -72,120 +75,165 @@ export default function Signup({ switchToLogin }: SignupProps) {
   }
 
   return (
-    <div className="p-6 bg-gray-800 rounded-lg shadow-lg shadow-black/20 w-full border border-gray-700">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-100">Create Account</h2>
-        <p className="text-gray-400 mt-2">Register to manage school documents</p>
+    <div
+      className="card animate-fadeInFast w-full"
+      style={{ 
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
+        borderRadius: "0.75rem",
+        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.15)",
+        padding: "2rem",
+        border: "1px solid rgba(255, 255, 255, 0.3)",
+        backdropFilter: "blur(10px)",
+        transition: "all 0.3s ease"
+      }}
+      data-oid="cr.fzuy"
+    >
+      <div className="text-center mb-6" data-oid="o7teh2.">
+        <h2 
+          className="text-2xl font-bold" 
+          style={{ color: "#0a2540" }}
+          data-oid="4p2_ok5"
+        >
+          Create Teacher Account
+        </h2>
+        <p 
+          style={{ color: "#4a5568" }}
+          className="mt-2" 
+          data-oid="nnodg_c"
+        >
+          Register to manage your school documents
+        </p>
       </div>
-      
+
       {error && (
-        <div className="bg-red-900 bg-opacity-20 border border-red-700 text-red-400 px-4 py-3 rounded mb-4">
+        <div
+          className="status-rejected px-4 py-3 rounded mb-4 animate-fadeInFast"
+          data-oid="5d2x__f"
+        >
           {error}
         </div>
       )}
-      
+
       {success && (
-        <div className="bg-green-900 bg-opacity-20 border border-green-700 text-green-400 px-4 py-3 rounded mb-4">
+        <div
+          className="status-approved px-4 py-3 rounded mb-4 animate-fadeInFast"
+          data-oid="r2j2zf7"
+        >
           Account created successfully! Redirecting to login...
         </div>
       )}
-      
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="email">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            className="bg-gray-700 border border-gray-600 rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:ring focus:ring-blue-500"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={loading || success}
-          />
-        </div>
-        
-        <div>
-          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="password">
-            Password
-          </label>
-          <input
-            type="password"
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4"
+        data-oid=".e0uu_v"
+      >
+        <InputField
+          id="email"
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={loading || success}
+          data-oid="20gzh9l"
+        />
+
+        <div data-oid="o09il9f">
+          <InputField
             id="password"
-            className="bg-gray-700 border border-gray-600 rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:ring focus:ring-blue-500"
+            label="Password"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={loading || success}
+            data-oid="zw-u499"
           />
-          <p className="text-xs text-gray-400 mt-1">Must be at least 6 characters</p>
+
+          <p
+            className="text-xs mt-1"
+            style={{ color: "var(--color-text-muted)" }}
+            data-oid="p08_ah6"
+          >
+            Must be at least 6 characters
+          </p>
         </div>
-        
-        <div>
-          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="confirm-password">
-            Confirm Password
-          </label>
-          <input
-            type="password"
-            id="confirm-password"
-            className="bg-gray-700 border border-gray-600 rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:ring focus:ring-blue-500"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            disabled={loading || success}
-          />
-        </div>
-        
-        <div>
-          <label className="block text-gray-300 text-sm font-bold mb-2">
-            Role
-          </label>
-          <div className="flex flex-col space-y-2 bg-gray-700 p-3 rounded border border-gray-600">
-            <label className="inline-flex items-center">
+
+        <InputField
+          id="confirm-password"
+          label="Confirm Password"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          disabled={loading || success}
+          data-oid="e2:h676"
+        />
+
+        <div 
+          className="p-3 rounded bg-blue-50 border border-blue-200 text-blue-700 text-sm" 
+          data-oid="xdoa:ub"
+        >
+          <p className="flex items-center">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>You are signing up as a Teacher. Admin accounts are created by the system administrator.</span>
+          </p>
+          <div className="mt-2">
+            <label className="inline-flex items-center" data-oid="5_w3vw-">
               <input
                 type="checkbox"
-                className="rounded border-gray-600 bg-gray-800 text-blue-600 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                checked={isAdmin}
-                onChange={(e) => setIsAdmin(e.target.checked)}
-                disabled={loading || success}
-              />
-              <span className="ml-2 text-gray-300">Administrator (Principal)</span>
-            </label>
-            <label className="inline-flex items-center">
-              <input
-                type="checkbox"
-                className="rounded border-gray-600 bg-gray-800 text-blue-600 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                className="rounded border shadow-sm focus:ring focus:ring-opacity-50"
+                style={{ 
+                  borderColor: "var(--color-border)", 
+                  backgroundColor: "var(--color-bg-secondary)",
+                  color: "var(--color-primary)"
+                }}
                 checked={isTeacher}
                 onChange={(e) => setIsTeacher(e.target.checked)}
                 disabled={loading || success}
+                data-oid=".r0r.rk"
               />
-              <span className="ml-2 text-gray-300">Teacher</span>
+              <span 
+                className="ml-2 font-medium" 
+                style={{ color: "var(--color-primary)" }}
+                data-oid="7lxo4dl"
+              >
+                I confirm I am a teacher
+              </span>
             </label>
           </div>
         </div>
-        
-        <div className="flex items-center justify-between pt-2">
+
+        <div
+          className="flex items-center justify-between pt-2"
+          data-oid="oa_5d1s"
+        >
           <button
-            className={`bg-blue-700 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:ring-blue-500 ${
-              (loading || success) ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className="btn btn-primary"
+            style={{
+              opacity: loading || success ? "0.5" : "1",
+              cursor: loading || success ? "not-allowed" : "pointer"
+            }}
             type="submit"
             disabled={loading || success}
+            data-oid="_5qtdwf"
           >
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
-          
           <button
-            className="font-bold text-sm text-blue-400 hover:text-blue-300"
             type="button"
             onClick={switchToLogin}
-            disabled={loading}
+            className="text-primary hover:underline text-sm"
+            disabled={loading || success}
+            data-oid="1.5pqpx"
           >
-            Have an account? Login
+            Already have an account?
           </button>
         </div>
       </form>
     </div>
   );
-} 
+}

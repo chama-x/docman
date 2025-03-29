@@ -5,7 +5,7 @@ import { DocumentCategories } from '../types/documentTypes';
 // Add a new document type
 export const addDocumentType = async (typeName: string, isTeacherType: boolean): Promise<void> => {
   const category = isTeacherType ? 'teacher' : 'common';
-  const key = typeName.toLowerCase().replaceAll(' ', '_');
+  const key = typeName.toLowerCase().replace(/ /g, '_');
   
   // Check if type already exists to prevent duplicates
   const docTypesRef = ref(database, `documentTypes/${category}`);
@@ -22,7 +22,11 @@ export const addDocumentType = async (typeName: string, isTeacherType: boolean):
     throw new Error('Document type with this key already exists');
   }
   
-  await update(ref(database, `documentTypes/${category}/${key}`), typeName);
+  // Create an object with the key as property and typeName as value
+  const updateData: Record<string, string> = {};
+  updateData[key] = typeName;
+  
+  await update(ref(database, `documentTypes/${category}`), updateData);
 };
 
 // Edit an existing document type
@@ -46,8 +50,13 @@ export const editDocumentType = async (
   await remove(ref(database, `documentTypes/${category}/${oldKey}`));
   
   // Add new entry
-  const newKey = newName.toLowerCase().replaceAll(' ', '_');
-  await update(ref(database, `documentTypes/${category}/${newKey}`), newName);
+  const newKey = newName.toLowerCase().replace(/ /g, '_');
+  
+  // Create an object with the key as property and newName as value
+  const updateData: Record<string, string> = {};
+  updateData[newKey] = newName;
+  
+  await update(ref(database, `documentTypes/${category}`), updateData);
   
   // Update any documents with the old type to use the new type
   const usersRef = ref(database, 'users');
@@ -104,22 +113,39 @@ export const getDocumentTypes = async (): Promise<DocumentCategories> => {
 export const initializeDefaultDocumentTypes = async (): Promise<void> => {
   const docTypesRef = ref(database, 'documentTypes');
   const snapshot = await get(docTypesRef);
-  
+
+  // Only initialize if the documentTypes node doesn't exist at all
   if (!snapshot.exists()) {
+    console.log('Initializing default document types...');
     const defaultTypes: DocumentCategories = {
       common: {
-        nic: "NIC",
-        birth_certificate: "Birth Certificate",
-        appointment_letter: "Appointment Letter",
-        qualification_certificates: "Qualification Certificates"
+        // Existing common types
+        nic: "NIC", 
+        birth_certificate: "Birth Certificate", 
+        appointment_letter: "Appointment Letter", 
+        qualification_certificates: "Qualification Certificates", 
+        // New common types
+        letter_of_acceptance: "Letter of Acceptance", 
+        good_delivery_document: "Good Delivery Document", 
+        log_record: "Log Record", 
+        marriage_certificate: "Marriage Certificate", 
+        medical_record: "Medical Record", 
+        holiday_details: "Holiday Details", 
+        teacher_info_form: "Teacher Information Form", 
+        promotion_letter: "Promotion Letter" // Moved from teacher
       },
       teacher: {
-        transfer_letter: "Transfer Letter",
-        promotion_letter: "Promotion Letter",
-        disciplinary_letter: "Disciplinary Letter"
+        // Existing teacher types
+        transfer_letter: "Transfer Letter", 
+        disciplinary_letter: "Letters on Disciplinary Issues", // Updated value
+        // New teacher types
+        letter_of_attachment: "Letter of Attachment" 
       }
     };
     
     await set(docTypesRef, defaultTypes);
+    console.log('Default document types initialized.');
+  } else {
+    console.log('Document types already exist, skipping default initialization.');
   }
 }; 

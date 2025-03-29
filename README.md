@@ -1,114 +1,104 @@
-# School Document Manager
+# DocMan - Document Management System
 
-A document management system for schools where staff can manage their files based on roles.
+A document management system for school administrators and teachers to upload, manage, and organize important documents.
 
 ## Features
 
-- Pre-loaded document types (NIC, Birth Certificate, etc.)
-- Role-based access control (Admin, Teacher)
-- Document category management for admins
-- Document uploading and tracking for all users
-- Testing mode with sample users and documents
+- User authentication with role-based access control
+- Document upload and management
+- Approval workflow for documents
+- Document categorization
+- Administrative dashboard
+- Teacher dashboard
+- Mobile responsive design
+
+## Tech Stack
+
+- React 19
+- TypeScript
+- Firebase (Authentication, Realtime Database)
+- Cloudinary (Document storage)
+- TailwindCSS
+- Vite
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (version 18+)
 - npm or yarn
-- Firebase account
 
 ### Installation
 
 1. Clone the repository
 
-```bash
-git clone https://github.com/yourusername/school-document-manager.git
-cd school-document-manager
-```
+   ```
+   git clone https://github.com/yourusername/docman.git
+   cd docman
+   ```
 
 2. Install dependencies
 
-```bash
-npm install
-# or
-yarn install
-```
+   ```
+   npm install
+   ```
 
-3. Set up Firebase
-   - Create a new Firebase project
-   - Enable Authentication (Email/Password)
-   - Enable Realtime Database
-   - Set up Firebase Storage
+3. Create a `.env` file in the root directory and add your environment variables (see `.env.example` for required variables)
 
 4. Start the development server
 
-```bash
-npm run dev
-# or
-yarn dev
+   ```
+   npm run dev
+   ```
+
+## Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_API_KEY=your_api_key
+VITE_CLOUDINARY_API_SECRET=your_api_secret
+VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
 ```
 
-## Testing the Application
+## Deployment
 
-The application comes with a test mode that can be used to quickly set up sample users and documents.
+### Netlify Deployment
 
-### Test Users
+This project is configured for easy deployment to Netlify.
 
-After setting up the application:
+1. Push your code to a GitHub repository
 
-1. Register a new account with admin privileges by checking the "Administrator (Principal)" checkbox.
-2. Login with the newly created admin account.
-3. From the admin dashboard, click the "Generate Test Users" button. This will create the following test accounts:
+2. Connect your GitHub repository to Netlify:
+   - Sign in to Netlify
+   - Click "New site from Git"
+   - Select GitHub and authorize Netlify
+   - Pick your repository
+   - Set build command: `npm run build`
+   - Set publish directory: `dist`
 
-   | Email | Password | Role |
-   |-------|----------|------|
-   | <principal@school.edu> | password123 | Admin |
-   | <docmanager@school.edu> | password123 | Admin |
-   | <teacher1@school.edu> | password123 | Teacher |
-   | <teacher2@school.edu> | password123 | Teacher |
-   | <teacher3@school.edu> | password123 | Teacher |
+3. Configure environment variables in Netlify:
+   - Go to Site settings > Build & deploy > Environment
+   - Add all the required environment variables from your `.env` file
 
-4. Click "Generate Sample Documents" to create random documents for all users.
+4. Deploy your site!
 
-### Testing Different User Roles
+### Manual Deployment
 
-#### Admin User
+To build the project for production:
 
-- Can manage document categories (add, edit, delete)
-- Can upload documents
-- Can view test user management
+```
+npm run build
+```
 
-#### Teacher User
+The build files will be generated in the `dist` directory.
 
-- Can upload documents
-- Can see teacher-specific document types
-- Cannot manage document categories
+## Test Accounts
 
-## Document Type Management
-
-Admins can:
-
-- Add new document types (common or teacher-specific)
-- Edit existing document types
-- Delete document types
-
-## Document Upload
-
-All users can:
-
-- Upload PDF documents (up to 5MB)
-- Select document type from available options
-- View their uploaded documents
-- Delete their documents
-
-## Project Structure
-
-- `/src`: Source files
-  - `/components`: React components
-  - `/contexts`: Context providers
-  - `/services`: Firebase services
-  - `/types`: TypeScript interfaces
+- Principal: <principal@school.edu> / password123
+- Document Manager: <docmanager@school.edu> / password123
+- Teachers: <teacher1@school.edu>, <teacher2@school.edu>, <teacher3@school.edu> / password123
 
 ## License
 

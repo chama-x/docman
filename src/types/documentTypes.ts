@@ -19,6 +19,14 @@ export interface Document {
   status: 'pending' | 'approved' | 'rejected';
   uploadedAt: number;
   fileName: string;
+  name?: string;
+  originalFileName?: string;
+  fileSize?: number;
+  publicId?: string;
+  lastModified?: number;
+  verifiedBy?: string;
+  verifiedAt?: number;
+  rejectionReason?: string;
 }
 
 export interface UserRole {

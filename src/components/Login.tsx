@@ -1,22 +1,23 @@
-import { useState, FormEvent } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { FirebaseError } from 'firebase/app';
+import { useState, FormEvent } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { FirebaseError } from "firebase/app";
+import InputField from "./InputField";
+import TestAccountSelector from "./TestAccountSelector";
 
 interface LoginProps {
   switchToSignup: () => void;
 }
 
 export default function Login({ switchToSignup }: LoginProps) {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [showTestAccounts, setShowTestAccounts] = useState<boolean>(false);
   const { login } = useAuth();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
 
     try {
       setLoading(true);
@@ -24,23 +25,23 @@ export default function Login({ switchToSignup }: LoginProps) {
     } catch (error) {
       if (error instanceof FirebaseError) {
         switch (error.code) {
-          case 'auth/invalid-email':
-            setError('Invalid email address');
+          case "auth/invalid-email":
+            setError("Invalid email address");
             break;
-          case 'auth/user-not-found':
-            setError('No account found with this email');
+          case "auth/user-not-found":
+            setError("No account found with this email");
             break;
-          case 'auth/wrong-password':
-            setError('Incorrect password');
+          case "auth/wrong-password":
+            setError("Incorrect password");
             break;
-          case 'auth/invalid-credential':
-            setError('Invalid login credentials');
+          case "auth/invalid-credential":
+            setError("Invalid login credentials");
             break;
           default:
             setError(`Failed to sign in: ${error.message}`);
         }
       } else {
-        setError('Failed to sign in');
+        setError("Failed to sign in");
       }
       console.error(error);
     } finally {
@@ -48,126 +49,176 @@ export default function Login({ switchToSignup }: LoginProps) {
     }
   }
 
-  function handleUseTestAccount(testEmail: string) {
+  function handleSelectTestAccount(testEmail: string, testPassword?: string) {
     setEmail(testEmail);
-    setPassword('password123');
+    if (testPassword) {
+      setPassword(testPassword);
+    }
   }
 
   return (
-    <div className="p-6 bg-gray-800 rounded-lg shadow-lg shadow-black/20 w-full border border-gray-700">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-100">School Document Manager</h2>
-        <p className="text-gray-400 mt-2">Sign in to manage your documents</p>
+    <div
+      className="card animate-fadeInFast"
+      style={{ 
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
+        borderRadius: "0.75rem",
+        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.15)",
+        padding: "2rem",
+        border: "1px solid rgba(255, 255, 255, 0.3)",
+        width: "100%",
+        backdropFilter: "blur(10px)",
+        transition: "all 0.3s ease"
+      }}
+      data-oid="b7foxo5"
+    >
+      <div className="text-center mb-6" data-oid="2d6.c-5">
+        <h2 
+          className="text-2xl font-bold" 
+          style={{ color: "#0a2540" }}
+          data-oid="_kcxbgd"
+        >
+          School Document Manager
+        </h2>
+        <p 
+          className="mt-2" 
+          style={{ color: "#4a5568" }}
+          data-oid="pmm51.s"
+        >
+          Sign in to manage your documents
+        </p>
       </div>
-      
+
       {error && (
-        <div className="bg-red-900 bg-opacity-20 border border-red-700 text-red-400 px-4 py-3 rounded mb-4">
+        <div
+          style={{
+            backgroundColor: "rgba(220, 76, 100, 0.1)",
+            border: "1px solid rgba(220, 76, 100, 0.3)",
+            color: "rgb(220, 76, 100)",
+            padding: "0.75rem 1rem",
+            borderRadius: "0.375rem",
+            marginBottom: "1rem"
+          }}
+          className="animate-fadeInFast"
+          data-oid="odeswt-"
+        >
           {error}
         </div>
       )}
-      
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="email">
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4"
+        style={{ width: "100%" }}
+        data-oid="l6fxnbi"
+      >
+        <div className="mb-4" style={{ width: "100%" }}>
+          <label 
+            htmlFor="email" 
+            className="block text-sm font-medium mb-1"
+            style={{ color: "#333", textAlign: "left" }}
+          >
             Email
           </label>
           <input
-            type="email"
             id="email"
-            className="bg-gray-700 border border-gray-600 rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:ring focus:ring-blue-500"
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={loading}
+            className="w-full px-3 py-2 rounded-md border"
+            style={{
+              backgroundColor: "#f8f9fa",
+              borderColor: "#e5e7eb",
+              width: "100%",
+              boxSizing: "border-box",
+              color: "#333"
+            }}
+            data-oid="agaxf32"
           />
         </div>
-        <div>
-          <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="password">
+
+        <div className="mb-4" style={{ width: "100%" }}>
+          <label 
+            htmlFor="password" 
+            className="block text-sm font-medium mb-1"
+            style={{ color: "#333", textAlign: "left" }}
+          >
             Password
           </label>
           <input
-            type="password"
             id="password"
-            className="bg-gray-700 border border-gray-600 rounded w-full py-2 px-3 text-gray-100 leading-tight focus:outline-none focus:ring focus:ring-blue-500"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={loading}
+            className="w-full px-3 py-2 rounded-md border"
+            style={{
+              backgroundColor: "#f8f9fa",
+              borderColor: "#e5e7eb",
+              width: "100%",
+              boxSizing: "border-box",
+              color: "#333"
+            }}
+            data-oid="hmtcedi"
           />
         </div>
-        <div className="flex items-center justify-between pt-2">
+
+        <div
+          className="flex items-center justify-between pt-2"
+          style={{ width: "100%" }}
+          data-oid="6h2og98"
+        >
           <button
-            className={`bg-blue-700 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:ring-blue-500 ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            style={{
+              backgroundColor: "#0077b6",
+              color: "white",
+              fontWeight: "bold",
+              padding: "0.5rem 1rem",
+              borderRadius: "0.375rem",
+              transition: "all 0.2s ease",
+              opacity: loading ? 0.5 : 1,
+              cursor: loading ? "not-allowed" : "pointer"
+            }}
             type="submit"
             disabled={loading}
+            data-oid="jba80cw"
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            {loading ? (
+              <div className="flex items-center" data-oid=":wvxfai">
+                <span
+                  className="inline-block animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full"
+                  data-oid="u8lty7_"
+                ></span>
+                Signing In...
+              </div>
+            ) : (
+              "Sign In"
+            )}
           </button>
           <button
-            className="font-bold text-sm text-blue-400 hover:text-blue-300"
+            style={{
+              fontWeight: "bold",
+              fontSize: "0.875rem",
+              color: "#0077b6",
+              transition: "all 0.2s ease"
+            }}
             type="button"
             onClick={switchToSignup}
             disabled={loading}
+            data-oid="n3e-r1l"
           >
             Create Account
           </button>
         </div>
       </form>
-      
-      <div className="mt-8">
-        <button
-          onClick={() => setShowTestAccounts(!showTestAccounts)}
-          className="text-sm text-gray-400 hover:text-gray-300 flex items-center"
-          disabled={loading}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          {showTestAccounts ? 'Hide Test Accounts' : 'Show Test Accounts'}
-        </button>
-        
-        {showTestAccounts && (
-          <div className="mt-4 bg-gray-700 p-4 rounded border border-gray-600">
-            <h3 className="text-md font-semibold mb-3 text-gray-200">Test Accounts</h3>
-            <p className="text-xs text-gray-300 mb-2">All accounts use password: <code className="bg-gray-800 px-1 py-0.5 rounded">password123</code></p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-              <button
-                onClick={() => handleUseTestAccount('principal@school.edu')}
-                className="text-left px-2 py-1 text-sm hover:bg-blue-900 rounded flex justify-between items-center"
-                disabled={loading}
-              >
-                <span className="text-gray-200">principal@school.edu</span>
-                <span className="bg-blue-900 text-blue-300 px-2 py-0.5 rounded text-xs font-semibold">Admin</span>
-              </button>
-              
-              <button
-                onClick={() => handleUseTestAccount('docmanager@school.edu')}
-                className="text-left px-2 py-1 text-sm hover:bg-purple-900 rounded flex justify-between items-center"
-                disabled={loading}
-              >
-                <span className="text-gray-200">docmanager@school.edu</span>
-                <span className="bg-purple-900 text-purple-300 px-2 py-0.5 rounded text-xs font-semibold">Admin</span>
-              </button>
-              
-              <button
-                onClick={() => handleUseTestAccount('teacher1@school.edu')}
-                className="text-left px-2 py-1 text-sm hover:bg-green-900 rounded flex justify-between items-center"
-                disabled={loading}
-              >
-                <span className="text-gray-200">teacher1@school.edu</span>
-                <span className="bg-green-900 text-green-300 px-2 py-0.5 rounded text-xs font-semibold">Teacher</span>
-              </button>
-            </div>
-            
-            <p className="text-xs text-gray-400 mt-3">
-              Note: You need to create an admin account first and use it to generate test accounts.
-            </p>
-          </div>
-        )}
-      </div>
+
+      <TestAccountSelector
+        disabled={loading}
+        onSelectAccount={handleSelectTestAccount}
+        data-oid="40-qdyw"
+      />
     </div>
   );
 }
