@@ -1,0 +1,1 @@
+export { default as Magnet, type MagnetProps } from './Magnet'; 

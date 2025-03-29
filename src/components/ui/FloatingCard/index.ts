@@ -1,0 +1,1 @@
+export { default as FloatingCard, type FloatingCardProps } from './FloatingCard'; 

@@ -1,0 +1,19 @@
+{
+  "extends": "../tsconfig.app.json",
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@components/*": ["./components/*"],
+      "@pages/*": ["./pages/*"],
+      "@layouts/*": ["./layouts/*"],
+      "@contexts/*": ["./contexts/*"],
+      "@assets/*": ["./assets/*"],
+      "@utils/*": ["./utils/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@types/*": ["./types/*"]
+    }
+  },
+  "include": ["./**/*.ts", "./**/*.tsx"]
+}
