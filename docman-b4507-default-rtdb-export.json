@@ -1,0 +1,23 @@
+{
+  "documentTypes": {
+    "common": {
+      "appointment_letter": "Appointment Letter",
+      "birth_certificate": "Birth Certificate",
+      "nic": "NIC",
+      "qualification_certificates": "Qualification Certificates"
+    },
+    "teacher": {
+      "disciplinary_letter": "Disciplinary Letter",
+      "promotion_letter": "Promotion Letter",
+      "transfer_letter": "Transfer Letter"
+    }
+  },
+  "users": {
+    "WcIZ4Nqiu8cDlFECD6XAAr2eXk22": {
+      "roles": {
+        "isAdmin": false,
+        "isTeacher": true
+      }
+    }
+  }
+}
