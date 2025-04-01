@@ -23,13 +23,14 @@ const adminTitles: Record<string, string> = {
 interface UserRoles {
   isAdmin: boolean;
   isTeacher: boolean;
+  isNonAcademic?: boolean;
   title?: string;
 }
 
 interface AuthContextType {
   currentUser: FirebaseUser | null;
   userRoles: UserRoles;
-  signup: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, role: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
@@ -38,7 +39,7 @@ interface AuthContextType {
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
-  userRoles: { isAdmin: false, isTeacher: false },
+  userRoles: { isAdmin: false, isTeacher: false, isNonAcademic: false },
   signup: async () => {},
   login: async () => {},
   logout: async () => {},
@@ -66,6 +67,7 @@ export const getUserRoles = async (
       return {
         isAdmin: true,
         isTeacher: false,
+        isNonAcademic: false,
         ...(title ? { title } : {}),
       };
     }
@@ -86,17 +88,17 @@ export const getUserRoles = async (
       console.log(
         `No roles found for ${userId}, but email suggests teacher role`,
       );
-      return { isAdmin: false, isTeacher: true };
+      return { isAdmin: false, isTeacher: true, isNonAcademic: false };
     }
 
     // Default to regular user roles
     console.log(
       `No roles found for ${userId}, using default regular user role`,
     );
-    return { isAdmin: false, isTeacher: false };
+    return { isAdmin: false, isTeacher: false, isNonAcademic: false };
   } catch (error) {
     console.error(`Error getting roles for user ${userId}:`, error);
-    return { isAdmin: false, isTeacher: false };
+    return { isAdmin: false, isTeacher: false, isNonAcademic: false };
   }
 };
 
@@ -121,11 +123,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userRoles, setUserRoles] = useState<UserRoles>({
     isAdmin: false,
     isTeacher: false,
+    isNonAcademic: false,
   });
   const [loading, setLoading] = useState<boolean>(true);
 
   // Signup function
-  async function signup(email: string, password: string) {
+  async function signup(email: string, password: string, name: string, role: string) {
     try {
       const result = await createUserWithEmailAndPassword(
         auth,
@@ -133,25 +136,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       );
 
-      // Set initial roles based on email
-      let roles: UserRoles = { isAdmin: false, isTeacher: false };
+      // Set initial roles based on role parameter
+      let roles: UserRoles = { 
+        isAdmin: false, 
+        isTeacher: false,
+        isNonAcademic: false 
+      };
 
       // If this is a known admin email
       if (adminEmails.includes(email.toLowerCase())) {
         roles = {
           isAdmin: true,
           isTeacher: false,
+          isNonAcademic: false,
           title: adminTitles[email.toLowerCase()],
         };
       }
-      // If email contains 'teacher', assign teacher role
-      else if (email.includes("teacher")) {
-        roles = { isAdmin: false, isTeacher: true };
+      // Otherwise set roles based on the selected role
+      else if (role === 'teacher') {
+        roles = { isAdmin: false, isTeacher: true, isNonAcademic: false };
+      }
+      else if (role === 'nonAcademic') {
+        roles = { isAdmin: false, isTeacher: false, isNonAcademic: true };
       }
 
-      // Save roles to database
+      // Save user data to database
       const user = result.user;
-      await updateUserRoles(user.uid, roles);
+      const userRef = ref(database, `users/${user.uid}`);
+      
+      await set(userRef, {
+        email: email,
+        name: name,
+        roles: roles,
+        createdAt: Date.now()
+      });
     } catch (error) {
       console.error("Signup error:", error);
       throw error;
@@ -174,7 +192,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function logout() {
     try {
       await signOut(auth);
-      setUserRoles({ isAdmin: false, isTeacher: false }); // Reset roles on logout
+      setUserRoles({ isAdmin: false, isTeacher: false, isNonAcademic: false }); // Reset roles on logout
     } catch (error) {
       console.error("Logout error:", error);
       throw error;
@@ -201,6 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const adminRole: UserRoles = {
               isAdmin: true,
               isTeacher: false,
+              isNonAcademic: false,
               title: adminTitles[user.email?.toLowerCase() || ""],
             };
             // Check if current roles need update before writing
@@ -228,14 +247,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
           console.error("Error setting user roles:", error);
           // Optionally set roles to default or handle error state
-          setUserRoles({ isAdmin: false, isTeacher: false });
+          setUserRoles({ isAdmin: false, isTeacher: false, isNonAcademic: false });
         } finally {
           // Set loading to false after roles are processed or if an error occurred
           setLoading(false);
         }
       } else {
         // User is logged out, reset roles and set loading to false
-        setUserRoles({ isAdmin: false, isTeacher: false });
+        setUserRoles({ isAdmin: false, isTeacher: false, isNonAcademic: false });
         setLoading(false);
       }
 

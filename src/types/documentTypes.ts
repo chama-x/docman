@@ -10,6 +10,7 @@ export interface DocumentCategory {
 export interface DocumentCategories {
   common: DocumentCategory;
   teacher: DocumentCategory;
+  nonAcademic?: DocumentCategory;
 }
 
 export interface Document {
@@ -32,10 +33,12 @@ export interface Document {
 export interface UserRole {
   isAdmin: boolean;
   isTeacher: boolean;
+  isNonAcademic?: boolean;
 }
 
 export interface User extends UserRole {
   uid: string;
   email: string;
+  name?: string;
   createdAt?: number;
 } 

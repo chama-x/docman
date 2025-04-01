@@ -4,6 +4,7 @@ import {
   getAllUsers,
   initializeTestUsers,
   fixUserRoles,
+  addNamesToExistingUsers,
 } from "../services/userService";
 import {
   createSampleDocuments,
@@ -92,6 +93,24 @@ export default function AdminPanel() {
     }
   };
 
+  const handleAddNamesToUsers = async () => {
+    try {
+      setIsOperationInProgress(true);
+      setError("");
+      setSuccess("");
+
+      await addNamesToExistingUsers();
+      await loadUsers();
+
+      setSuccess("Names have been added to users successfully!");
+    } catch (error) {
+      setError("Failed to add names to users");
+      console.error(error);
+    } finally {
+      setIsOperationInProgress(false);
+    }
+  };
+
   const handleGenerateSampleDocuments = async () => {
     try {
       setIsOperationInProgress(true);
@@ -141,6 +160,11 @@ export default function AdminPanel() {
             promotion_letter: "Promotion Letter",
             transfer_letter: "Transfer Letter",
           },
+          nonAcademic: {
+            work_contract: "Work Contract",
+            leave_form: "Leave Application",
+            performance_review: "Performance Review"
+          },
         },
       });
 
@@ -172,7 +196,7 @@ export default function AdminPanel() {
   const adminOperations: AdminOperation[] = [
     {
       name: "Generate Test Users",
-      description: "Creates sample users: principal, doc manager, and 3 teachers",
+      description: "Creates sample users: principal, doc manager, teachers, and non-academic staff",
       handler: handleGenerateTestUsers,
       type: "normal",
     },
@@ -180,6 +204,12 @@ export default function AdminPanel() {
       name: "Fix User Roles",
       description: "Ensures that all users have the correct roles in the database",
       handler: handleFixUserRoles,
+      type: "normal",
+    },
+    {
+      name: "Add Names to Users",
+      description: "One-time script to add names to users who don't have names",
+      handler: handleAddNamesToUsers,
       type: "normal",
     },
     {
@@ -364,6 +394,15 @@ export default function AdminPanel() {
                     }}
                     data-oid="_gg1r8j"
                   >
+                    Name
+                  </th>
+                  <th
+                    className="py-3 px-6 border-b text-left text-xs font-medium uppercase tracking-wider"
+                    style={{ 
+                      borderColor: "var(--color-border)",
+                      color: "var(--color-text-secondary)"
+                    }}
+                  >
                     Email
                   </th>
                   <th
@@ -392,7 +431,7 @@ export default function AdminPanel() {
                 {users.length === 0 ? (
                   <tr data-oid="qbmzen7">
                     <td
-                      colSpan={3}
+                      colSpan={4}
                       className="py-6 text-center"
                       style={{ color: "var(--color-text-muted)" }}
                       data-oid="t06zyf3"
@@ -410,6 +449,15 @@ export default function AdminPanel() {
                       }}
                       data-oid="a8dxz.b"
                     >
+                      <td
+                        className="py-3 px-6 text-sm font-medium border-b"
+                        style={{ 
+                          borderColor: "var(--color-border)",
+                          color: "var(--color-text-primary)"
+                        }}
+                      >
+                        {user.name || "Unknown"}
+                      </td>
                       <td
                         className="py-3 px-6 text-sm font-medium border-b"
                         style={{ 
@@ -448,6 +496,17 @@ export default function AdminPanel() {
                               data-oid="fegg0zz"
                             >
                               Teacher
+                            </span>
+                          )}
+                          {user.isNonAcademic && (
+                            <span
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                              style={{ 
+                                backgroundColor: "rgba(var(--color-warning-rgb), 0.1)",
+                                color: "var(--color-warning)"
+                              }}
+                            >
+                              Non-Academic
                             </span>
                           )}
                         </div>
@@ -509,6 +568,10 @@ export default function AdminPanel() {
           <li className="list-disc" data-oid="z9a_rvh">
             <strong data-oid="l1uhhsm">Teachers:</strong> teacher1@school.edu,
             teacher2@school.edu, teacher3@school.edu / password123
+          </li>
+          <li className="list-disc">
+            <strong>Non-Academic Staff:</strong> nonacademic1@school.edu,
+            nonacademic2@school.edu, nonacademic3@school.edu / password123
           </li>
         </ul>
       </div>

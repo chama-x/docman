@@ -6,13 +6,13 @@ import { useAuth } from "../contexts/AuthContext";
 import { uploadToCloudinary } from "../services/cloudinaryService"; // Import the real Cloudinary service
 
 interface DocumentUploaderProps {
-  documentTypes: DocumentCategories;
-  onUploadSuccess: () => void;
+  documentTypes: Record<string, string> | DocumentCategories;
+  onUploadSuccess?: () => void;
 }
 
 export default function DocumentUploader({
   documentTypes,
-  onUploadSuccess,
+  onUploadSuccess = () => {},
 }: DocumentUploaderProps) {
   const [documentType, setDocumentType] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
@@ -25,12 +25,24 @@ export default function DocumentUploader({
   const { currentUser, userRoles } = useAuth();
 
   // Combine document types based on user role
-  const availableTypes: Record<string, string> = {
-    ...documentTypes.common,
-  };
-
-  if (userRoles.isTeacher) {
-    Object.assign(availableTypes, documentTypes.teacher);
+  let availableTypes: Record<string, string> = {};
+  
+  // Check if documentTypes is a DocumentCategories object or a simple Record
+  if ('common' in documentTypes) {
+    // It's a DocumentCategories object
+    const typesObj = documentTypes as DocumentCategories;
+    availableTypes = { ...typesObj.common };
+    
+    if (userRoles.isTeacher && typesObj.teacher) {
+      Object.assign(availableTypes, typesObj.teacher);
+    }
+    
+    if (userRoles.isNonAcademic && typesObj.nonAcademic) {
+      Object.assign(availableTypes, typesObj.nonAcademic);
+    }
+  } else {
+    // It's already a flat Record<string, string>
+    availableTypes = documentTypes as Record<string, string>;
   }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {

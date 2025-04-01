@@ -11,7 +11,8 @@ export default function Signup({ switchToLogin }: SignupProps) {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [isTeacher, setIsTeacher] = useState<boolean>(true);
+  const [name, setName] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>("teacher");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
@@ -31,20 +32,25 @@ export default function Signup({ switchToLogin }: SignupProps) {
       return setError("Passwords do not match");
     }
 
-    if (!isTeacher) {
-      return setError("You must sign up as a teacher");
+    if (!name.trim()) {
+      return setError("Please enter your name");
+    }
+
+    if (!selectedRole) {
+      return setError("Please select a role");
     }
 
     try {
       setLoading(true);
-      await signup(email, password);
+      await signup(email, password, name, selectedRole);
       setSuccess(true);
 
       // Reset form after successful signup
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-      setIsTeacher(true);
+      setName("");
+      setSelectedRole("teacher");
 
       // Switch to login after 2 seconds
       setTimeout(() => {
@@ -94,7 +100,7 @@ export default function Signup({ switchToLogin }: SignupProps) {
           style={{ color: "#0a2540" }}
           data-oid="4p2_ok5"
         >
-          Create Teacher Account
+          Create Account
         </h2>
         <p 
           style={{ color: "#4a5568" }}
@@ -128,6 +134,16 @@ export default function Signup({ switchToLogin }: SignupProps) {
         className="flex flex-col gap-4"
         data-oid=".e0uu_v"
       >
+        <InputField
+          id="name"
+          label="Full Name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          disabled={loading || success}
+        />
+
         <InputField
           id="email"
           label="Email"
@@ -179,31 +195,54 @@ export default function Signup({ switchToLogin }: SignupProps) {
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <span>You are signing up as a Teacher. Admin accounts are created by the system administrator.</span>
+            <span>You are signing up as a staff member. Admin accounts are created by the system administrator.</span>
           </p>
-          <div className="mt-2">
-            <label className="inline-flex items-center" data-oid="5_w3vw-">
-              <input
-                type="checkbox"
-                className="rounded border shadow-sm focus:ring focus:ring-opacity-50"
-                style={{ 
-                  borderColor: "var(--color-border)", 
-                  backgroundColor: "var(--color-bg-secondary)",
-                  color: "var(--color-primary)"
-                }}
-                checked={isTeacher}
-                onChange={(e) => setIsTeacher(e.target.checked)}
-                disabled={loading || success}
-                data-oid=".r0r.rk"
-              />
-              <span 
-                className="ml-2 font-medium" 
-                style={{ color: "var(--color-primary)" }}
-                data-oid="7lxo4dl"
-              >
-                I confirm I am a teacher
-              </span>
-            </label>
+          <div className="mt-3">
+            <p className="mb-2 font-medium">Select your role:</p>
+            <div className="flex flex-col gap-2">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  className="rounded-full border shadow-sm focus:ring focus:ring-opacity-50"
+                  style={{ 
+                    borderColor: "var(--color-border)", 
+                    backgroundColor: "var(--color-bg-secondary)",
+                    color: "var(--color-primary)"
+                  }}
+                  checked={selectedRole === "teacher"}
+                  onChange={() => setSelectedRole("teacher")}
+                  disabled={loading || success}
+                  name="role"
+                />
+                <span 
+                  className="ml-2" 
+                  style={{ color: "var(--color-text-primary)" }}
+                >
+                  Teacher
+                </span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  className="rounded-full border shadow-sm focus:ring focus:ring-opacity-50"
+                  style={{ 
+                    borderColor: "var(--color-border)", 
+                    backgroundColor: "var(--color-bg-secondary)",
+                    color: "var(--color-primary)"
+                  }}
+                  checked={selectedRole === "nonAcademic"}
+                  onChange={() => setSelectedRole("nonAcademic")}
+                  disabled={loading || success}
+                  name="role"
+                />
+                <span 
+                  className="ml-2" 
+                  style={{ color: "var(--color-text-primary)" }}
+                >
+                  Non-Academic Staff
+                </span>
+              </label>
+            </div>
           </div>
         </div>
 
