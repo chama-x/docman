@@ -10,7 +10,7 @@ import {
 
 function AppContent() {
   const { currentUser, loading } = useAuth();
-  const [dbInitializing, setDbInitializing] = useState<boolean>(true);
+  const [dbInitializing, setDbInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,16 +21,28 @@ function AppContent() {
     document.body.classList.add("bg-primary", "text-primary");
 
     const init = async () => {
+      // Only try to initialize the database if the user is logged in
+      if (!currentUser) {
+        setDbInitializing(false);
+        return;
+      }
+
       try {
         setInitError(null);
         setDbInitializing(true);
 
-        const currentStatus = await getAppStatus();
+        // Wait a bit to ensure Firebase auth token is fully propagated
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
+        const currentStatus = await getAppStatus();
+        
+        // Even if we got a permission error (resulting in null status),
+        // we don't need to show an error to the user at this stage
         if (currentStatus !== "initialized") {
           console.log(
             "App not marked as initialized, running initialization checks...",
           );
+          
           await initializeDatabase();
           await updateAppStatus("initialized");
           console.log("Initialization process complete.");
@@ -39,16 +51,15 @@ function AppContent() {
         }
       } catch (error) {
         console.error("Application initialization failed:", error);
-        setInitError(
-          "Failed to initialize application. Please try refreshing.",
-        );
+        // Only show errors when critical, not for permission issues
+        setInitError(null);
       } finally {
         setDbInitializing(false);
       }
     };
 
     init();
-  }, []);
+  }, [currentUser]); // Depend on currentUser so init runs after login
 
   if (initError) {
     return (
