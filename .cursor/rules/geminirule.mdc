@@ -1,9 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-
-# for gemini 2.5 pro
-
-If the model is gemini 2.5 pro version do all edits in one step, do not stop outputs after small edits

@@ -2,41 +2,41 @@ import { useState, useEffect } from "react";
 import { User } from "../types/documentTypes";
 import {
   getAllUsers,
-  initializeTestUsers,
-  fixUserRoles,
-  addNamesToExistingUsers,
+  // initializeTestUsers, // Commented out as part of User Management removal
+  // fixUserRoles, // Commented out as part of User Management removal
+  // addNamesToExistingUsers, // Commented out as part of User Management removal
 } from "../services/userService";
-import {
-  createSampleDocuments,
-  deleteAllDocuments,
-} from "../services/testDataService";
+// import {
+//   createSampleDocuments, // Commented out as part of User Management removal
+//   deleteAllDocuments, // Commented out as part of User Management removal
+// } from "../services/testDataService"; // Commented out as part of User Management removal
 import { useAuth } from "../contexts/AuthContext";
-import { ref, set } from "firebase/database";
-import { database } from "../firebase";
+// import { ref, set } from "firebase/database"; // Commented out as part of User Management removal
+// import { database } from "../../firebase"; // Commented out as part of User Management removal
 
-// Define types for admin operations
-type OperationType = "normal" | "caution" | "danger";
+// Define types for admin operations - Commented out
+// type OperationType = "normal" | "caution" | "danger";
 
-interface AdminOperation {
-  name: string;
-  description: string;
-  handler: () => Promise<void>;
-  type: OperationType;
-  confirmationMessage?: string;
-}
+// interface AdminOperation {
+//   name: string;
+//   description: string;
+//   handler: () => Promise<void>;
+//   type: OperationType;
+//   confirmationMessage?: string;
+// }
 
 export default function AdminPanel() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isOperationInProgress, setIsOperationInProgress] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
+  // const [isOperationInProgress, setIsOperationInProgress] = useState<boolean>(false); // Commented out
+  // const [error, setError] = useState<string>(""); // Commented out
+  // const [success, setSuccess] = useState<string>(""); // Commented out
   const { userRoles, currentUser } = useAuth();
 
   // Determine if user is principal or document manager
   const isPrincipal =
     currentUser?.email?.toLowerCase() === "principal@school.edu";
-  const themeColor = isPrincipal ? "blue" : "purple";
+  // const themeColor = isPrincipal ? "blue" : "purple"; // Commented out
 
   useEffect(() => {
     if (!userRoles.isAdmin) return;
@@ -50,13 +50,15 @@ export default function AdminPanel() {
       const allUsers = await getAllUsers();
       setUsers(allUsers);
     } catch (error) {
-      setError("Failed to load users");
-      console.error(error);
+      // setError("Failed to load users"); // Commented out
+      console.error("Failed to load users", error); // Keep console error for debugging
     } finally {
       setLoading(false);
     }
   };
 
+  // Commented out User Management functions
+  /*
   const handleGenerateTestUsers = async () => {
     try {
       setIsOperationInProgress(true);
@@ -181,6 +183,7 @@ export default function AdminPanel() {
       setIsOperationInProgress(false);
     }
   };
+  */
 
   const formatDate = (timestamp: number): string => {
     return new Date(timestamp).toLocaleString("en-US", {
@@ -192,7 +195,8 @@ export default function AdminPanel() {
     });
   };
 
-  // Define admin operations
+  // Define admin operations - Commented out
+  /*
   const adminOperations: AdminOperation[] = [
     {
       name: "Generate Test Users",
@@ -227,8 +231,10 @@ export default function AdminPanel() {
       confirmationMessage: "WARNING: This will reset the entire database. All document data will be lost. Continue?",
     },
   ];
+  */
 
-  // Utility function to execute an operation with confirmation if needed
+  // Utility function to execute an operation with confirmation if needed - Commented out
+  /*
   const executeOperation = async (operation: AdminOperation) => {
     if (operation.confirmationMessage && operation.type !== "normal") {
       const confirmed = window.confirm(operation.confirmationMessage);
@@ -237,6 +243,7 @@ export default function AdminPanel() {
     
     await operation.handler();
   };
+  */
 
   if (!userRoles.isAdmin) {
     return null;
@@ -244,114 +251,101 @@ export default function AdminPanel() {
 
   return (
     <div className="space-y-6" data-oid="h8t1p0j">
-      <div className="flex justify-between items-center" data-oid="l.qdump">
-        <h2 className="text-xl font-bold">
-          User Management
-        </h2>
-        <button 
-          onClick={loadUsers}
-          className="text-sm px-3 py-1 rounded border hover:bg-opacity-10 transition-colors"
-          style={{ 
-            backgroundColor: "rgba(var(--color-primary-rgb), 0.05)",
-            borderColor: "rgba(var(--color-primary-rgb), 0.2)",
-            color: "var(--color-primary)"
-          }}
-          disabled={loading || isOperationInProgress}
-        >
-          {loading ? "Refreshing..." : "Refresh Users"}
-        </button>
-      </div>
-
-      {error && (
-        <div
-          className="bg-red-900 bg-opacity-20 border border-red-700 text-red-400 px-4 py-3 rounded flex items-center"
-          data-oid="oqpxvn:"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-          </svg>
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div
-          className="bg-green-900 bg-opacity-20 border border-green-700 text-green-400 px-4 py-3 rounded flex items-center"
-          data-oid="dex3jpj"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          {success}
-        </div>
-      )}
-
-      {/* Admin Operations Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-oid="oq1t:pj">
-        {adminOperations.map((operation, index) => {
-          // Set the appropriate styling based on operation type
-          const bgColor = operation.type === "danger" 
-            ? "rgba(var(--color-error-rgb), 0.05)" 
-            : operation.type === "caution"
-              ? "rgba(var(--color-warning-rgb), 0.05)"
-              : "rgba(var(--color-primary-rgb), 0.05)";
-          
-          const borderColor = operation.type === "danger" 
-            ? "rgba(var(--color-error-rgb), 0.2)" 
-            : operation.type === "caution"
-              ? "rgba(var(--color-warning-rgb), 0.2)"
-              : "rgba(var(--color-primary-rgb), 0.2)";
-          
-          const buttonBgColor = operation.type === "danger" 
-            ? "bg-red-900 hover:bg-red-800 text-red-300" 
-            : operation.type === "caution"
-              ? "bg-yellow-900 hover:bg-yellow-800 text-yellow-300"
-              : `bg-${themeColor}-900 hover:bg-${themeColor}-800 text-${themeColor}-300`;
-
-          return (
-            <div 
-              key={index}
-              className="rounded-lg border p-4 transition-all hover:shadow-md"
-              style={{ 
-                backgroundColor: bgColor,
-                borderColor: borderColor,
-              }}
+      {isPrincipal && (
+        <>
+          {/* User Management Section - This will be removed or commented out
+          <div className="flex justify-between items-center" data-oid="l.qdump">
+            <h2 className="text-xl font-bold">User Management</h2>
+            <button
+              onClick={loadUsers}
+              disabled={loading || isOperationInProgress}
+              className={`px-4 py-2 rounded-md text-white font-medium transition-colors
+                        bg-${themeColor}-600 hover:bg-${themeColor}-700
+                        disabled:bg-gray-400 disabled:cursor-not-allowed`}
+              data-oid="wz0378o"
             >
-              <h3 className="font-bold mb-2" style={{ 
-                color: operation.type === "danger" 
-                  ? "var(--color-error)" 
-                  : operation.type === "caution"
-                    ? "var(--color-warning)"
-                    : "var(--color-primary)"
-              }}>
-                {operation.name}
-              </h3>
-              
-              <p className="text-sm mb-4" style={{ color: "var(--color-text-secondary)" }}>
-                {operation.description}
-              </p>
-              
-              <button
-                onClick={() => executeOperation(operation)}
-                className={`${buttonBgColor} font-bold py-2 px-4 rounded flex items-center justify-center transition-colors`}
-                disabled={loading || isOperationInProgress}
-              >
-                {isOperationInProgress ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing...
-                  </>
-                ) : (
-                  operation.name
-                )}
-              </button>
+              Refresh Users
+            </button>
+          </div>
+
+          {error && (
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+              role="alert"
+              data-oid="1w5g1n4"
+            >
+              <strong className="font-bold">Error:</strong>
+              <span className="block sm:inline"> {error}</span>
             </div>
-          );
-        })}
-      </div>
+          )}
+
+          {success && (
+            <div
+              className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+              role="alert"
+              data-oid="aou93y4"
+            >
+              <strong className="font-bold">Success:</strong>
+              <span className="block sm:inline"> {success}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-oid="8i2h295">
+            {adminOperations.map((op) => (
+              <div
+                key={op.name}
+                className={`p-6 rounded-lg shadow-lg border
+                          ${
+                            op.type === "danger"
+                              ? "bg-red-50 border-red-200"
+                              : op.type === "caution"
+                              ? "bg-yellow-50 border-yellow-200"
+                              : "bg-gray-50 border-gray-200"
+                          }
+                          hover:shadow-xl transition-shadow`}
+                data-oid="c7b6q0s"
+              >
+                <h3
+                  className={`text-lg font-semibold mb-2 
+                            ${
+                              op.type === "danger"
+                                ? "text-red-700"
+                                : op.type === "caution"
+                                ? "text-yellow-700"
+                                : `text-${themeColor}-700`
+                            }`}
+                  data-oid="_wst.1u"
+                >
+                  {op.name}
+                </h3>
+                <p
+                  className="text-sm text-gray-600 mb-4"
+                  data-oid="j5m52t4"
+                >
+                  {op.description}
+                </p>
+                <button
+                  onClick={() => executeOperation(op)}
+                  disabled={loading || isOperationInProgress}
+                  className={`w-full px-4 py-2 rounded-md text-white font-medium transition-colors
+                            ${
+                              op.type === "danger"
+                                ? "bg-red-600 hover:bg-red-700"
+                                : op.type === "caution"
+                                ? "bg-yellow-500 hover:bg-yellow-600"
+                                : `bg-${themeColor}-600 hover:bg-${themeColor}-700`
+                            }
+                            disabled:bg-gray-400 disabled:cursor-not-allowed`}
+                  data-oid="b_3u71a"
+                >
+                  {op.name}
+                </button>
+              </div>
+            ))}
+          </div>
+          */}
+        </>
+      )}
 
       {/* User Accounts Section */}
       <div className="mt-8" data-oid="z7leswt">

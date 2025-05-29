@@ -7,8 +7,7 @@ import {
   User as FirebaseUser,
 } from "firebase/auth";
 import { auth, database } from "../firebase";
-import { ref, set, get, onValue, update } from "firebase/database";
-import { UserRole } from "../types/documentTypes";
+import { ref, set, get, onValue } from "firebase/database";
 
 // Define a list of special admin emails - always have admin role
 const adminEmails = ["principal@school.edu", "docmanager@school.edu"];
@@ -201,12 +200,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Auth state change listener
   useEffect(() => {
+    console.log("AuthContext: Setting up auth state listener");
+    let rolesUnsubscriber: (() => void) | null = null;
+
+    // Backup timeout to ensure loading is never stuck
+    const backupTimeout = setTimeout(() => {
+      console.log("AuthContext: Backup timeout triggered, forcing loading to false");
+      setLoading(false);
+    }, 5000); // 5 second backup
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log("Auth state changed:", user?.email);
+      console.log("Auth state changed:", user?.email || "No user");
+      console.log("Auth state change - user object:", user ? "User exists" : "No user");
+      
+      // Clear the backup timeout since we got a response
+      clearTimeout(backupTimeout);
+      
       setCurrentUser(user);
-      let unsubscribeRoles = () => {}; // Initialize roles unsubscriber
+
+      // Clean up previous roles listener
+      if (rolesUnsubscriber) {
+        rolesUnsubscriber();
+        rolesUnsubscriber = null;
+      }
 
       if (user) {
+        console.log("User is logged in, processing roles...");
         // If user is logged in
         try {
           // Get and set user roles (async operation)
@@ -222,6 +241,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               isNonAcademic: false,
               title: adminTitles[user.email?.toLowerCase() || ""],
             };
+            
+            try {
             // Check if current roles need update before writing
             const currentRoles = await get(
               ref(database, `users/${user.uid}/roles`),
@@ -231,50 +252,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               JSON.stringify(currentRoles.val()) !== JSON.stringify(adminRole)
             ) {
               await updateUserRoles(user.uid, adminRole);
+              }
+            } catch (roleUpdateError) {
+              console.error("Error updating admin roles:", roleUpdateError);
+              // Continue anyway, don't block loading
             }
           }
 
           // Listen for real-time role updates
           const userRolesRef = ref(database, `users/${user.uid}/roles`);
-          // Assign the actual unsubscriber function
-          unsubscribeRoles = onValue(userRolesRef, (snapshot) => {
+          rolesUnsubscriber = onValue(userRolesRef, (snapshot) => {
             if (snapshot.exists()) {
               const updatedRoles = snapshot.val();
               console.log("Role update from database:", updatedRoles);
               setUserRoles(updatedRoles);
             }
           });
+
         } catch (error) {
           console.error("Error setting user roles:", error);
-          // Optionally set roles to default or handle error state
+          // Set roles to default on error
           setUserRoles({ isAdmin: false, isTeacher: false, isNonAcademic: false });
-        } finally {
-          // Set loading to false after roles are processed or if an error occurred
-          setLoading(false);
         }
       } else {
-        // User is logged out, reset roles and set loading to false
+        console.log("No user, resetting roles and setting loading to false");
+        // User is logged out, reset roles
         setUserRoles({ isAdmin: false, isTeacher: false, isNonAcademic: false });
-        setLoading(false);
       }
 
-      // Return the roles unsubscriber cleanup function
-      // This needs to be returned by the main onAuthStateChanged callback
-      // The outer function handles the overall auth subscription cleanup.
+      // Always set loading to false after processing
+      console.log("AuthContext: Setting loading to false");
+      setLoading(false);
     });
 
-    // Return the main auth state unsubscriber cleanup function
-    // The setup inside onAuthStateChanged for roles needs its own cleanup mechanism
-    // let's adjust the logic slightly for clarity
-
     return () => {
-      unsubscribe(); // Unsubscribe from onAuthStateChanged
-      // The roles listener (onValue) might still be active if the component unmounts
-      // while a user is logged in. Firebase handles listener cleanup when auth state changes,
-      // but explicit cleanup on component unmount is safer.
-      // However, the previous logic tied unsubscribeRoles lifetime to the onAuthStateChanged callback.
-      // Let's simplify: Firebase's onAuthStateChanged handles its own listener lifecycle.
-      // We primarily need to unsubscribe from onAuthStateChanged itself when the provider unmounts.
+      console.log("AuthContext: Cleaning up auth state listener");
+      clearTimeout(backupTimeout); // Clean up the backup timeout
+      unsubscribe();
+      if (rolesUnsubscriber) {
+        rolesUnsubscriber();
+      }
     };
   }, []);
 

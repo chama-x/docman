@@ -23,6 +23,7 @@ function AppContent() {
     const init = async () => {
       // Only try to initialize the database if the user is logged in
       if (!currentUser) {
+        console.log("No current user, skipping initialization");
         setDbInitializing(false);
         return;
       }
@@ -30,36 +31,55 @@ function AppContent() {
       try {
         setInitError(null);
         setDbInitializing(true);
+        console.log("Starting initialization process...");
 
-        // Wait a bit to ensure Firebase auth token is fully propagated
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Shorter wait time for better UX
+        await new Promise(resolve => setTimeout(resolve, 500));
 
+        // Add timeout to prevent hanging
+        const initPromise = Promise.race([
+          (async () => {
         const currentStatus = await getAppStatus();
-        
-        // Even if we got a permission error (resulting in null status),
-        // we don't need to show an error to the user at this stage
+            console.log("App status:", currentStatus);
+
         if (currentStatus !== "initialized") {
-          console.log(
-            "App not marked as initialized, running initialization checks...",
-          );
-          
+              console.log("App not marked as initialized, running initialization checks...");
           await initializeDatabase();
           await updateAppStatus("initialized");
           console.log("Initialization process complete.");
         } else {
           console.log("App already initialized, skipping database setup.");
         }
+          })(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Initialization timeout")), 10000)
+          )
+        ]);
+
+        await initPromise;
       } catch (error) {
         console.error("Application initialization failed:", error);
-        // Only show errors when critical, not for permission issues
-        setInitError(null);
+        // Don't show timeout errors to users, just continue
+        if (error instanceof Error && error.message === "Initialization timeout") {
+          console.log("Initialization timed out, continuing anyway...");
+        }
       } finally {
+        console.log("Initialization complete, setting dbInitializing to false");
         setDbInitializing(false);
       }
     };
 
+    // Add a delay to ensure auth is fully settled
+    const timeoutId = setTimeout(() => {
+      if (currentUser && !loading) {
     init();
-  }, [currentUser]); // Depend on currentUser so init runs after login
+      } else if (!currentUser && !loading) {
+        setDbInitializing(false);
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [currentUser, loading]); // Also depend on loading state
 
   if (initError) {
     return (
@@ -129,6 +149,14 @@ function AppContent() {
               ? "Initializing database..."
               : "Loading application..."}
           </p>
+          {/* Debug info in development */}
+          {import.meta.env.DEV && (
+            <div className="mt-4 text-sm text-gray-600">
+              <p>Loading: {loading.toString()}</p>
+              <p>DB Initializing: {dbInitializing.toString()}</p>
+              <p>Current User: {currentUser ? 'Present' : 'None'}</p>
+            </div>
+          )}
         </div>
       </div>
     );
